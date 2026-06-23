@@ -10,10 +10,11 @@ in-context with the `pair` tool — no shell step needed:
 2. Show the user `verification_uri_complete` and `user_code`, and ask them to
    open it (if the browser didn't) and tap **Approve** — telling them to verify
    the on-screen code matches `user_code`.
-3. Once they say they've approved, call `pair` again passing that `device_code`
-   to finish. It saves the token to `~/.paigy/token.json`. If it returns
+3. Right after showing the link, call `pair` again passing that `device_code`
+   to finish — no need to wait for the user to confirm. It polls ~30s for the
+   approval and saves the token to `~/.paigy/token.json`. If it returns
    `{ status: "pending" }`, they haven't approved yet — call again with the same
-   `device_code` to keep waiting.
+   `device_code` to keep waiting (~30s per call).
 
 Then retry whatever you were doing.
 

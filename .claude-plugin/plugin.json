@@ -1,7 +1,7 @@
 {
   "name": "paigy",
   "description": "A voice inbox for your AI agents — call/notify the user, get their answer, continue.",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "author": { "name": "Paigy" },
   "homepage": "https://paigy.ai",
   "license": "MIT",
