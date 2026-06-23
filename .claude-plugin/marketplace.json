@@ -1,0 +1,12 @@
+{
+  "name": "paigy",
+  "owner": { "name": "paigy-ai" },
+  "plugins": [
+    {
+      "name": "paigy",
+      "source": "./",
+      "description": "Paigy — a voice inbox for your AI agents.",
+      "homepage": "https://paigy.ai"
+    }
+  ]
+}
