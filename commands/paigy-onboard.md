@@ -7,16 +7,17 @@ in-context with the `pair` tool — no shell step needed:
 
 1. Call the `pair` tool with **no arguments**. It opens the user's browser and
    returns `{ verification_uri_complete, user_code, device_code }`.
-2. Show the user `verification_uri_complete` and `user_code`, and ask them to
-   open it (if the browser didn't) and tap **Approve** — telling them to verify
-   the on-screen code matches `user_code`.
-3. Right after showing the link, call `pair` again passing that `device_code`
-   to finish — no need to wait for the user to confirm. It polls ~30s for the
-   approval and saves the token to `~/.paigy/token.json`. If it returns
-   `{ status: "pending" }`, they haven't approved yet — call again with the same
-   `device_code` to keep waiting (~30s per call).
+2. In one line, show the user `verification_uri_complete` and `user_code`, and
+   tell them to tap **Approve** (verifying the on-screen code matches).
+3. **In the SAME turn — do NOT stop to wait for the user — immediately call
+   `pair` again with that `device_code`.** The tool itself polls ~30s for the
+   approval; that is the waiting. On `{ status: "pending" }`, call it AGAIN with
+   the same `device_code` (each call waits another ~30s). Keep looping until it
+   returns the token. Only stop and ask the user if it's still pending after a
+   few windows (~2 min) — they may not have approved yet.
 
-Then retry whatever you were doing.
+Do not end your turn on "tell me once you've approved" — the poll is automatic;
+just keep calling `pair`. Once it returns the token, retry whatever you were doing.
 
 Fallback (older MCP without the `pair` tool): have the user run
 `npx -y @paigy/mcp paigy-mcp-onboard` in their shell and approve in the browser.
