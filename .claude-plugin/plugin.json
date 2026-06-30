@@ -1,14 +1,14 @@
 {
   "name": "paigy",
   "description": "A voice inbox for your AI agents — call/notify the user, get their answer, continue.",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "author": { "name": "Paigy" },
   "homepage": "https://paigy.ai",
   "license": "MIT",
   "mcpServers": {
     "paigy": {
       "command": "npx",
-      "args": ["-y", "@paigy/mcp"],
+      "args": ["-y", "@paigy/mcp@latest"],
       "env": { "PAIGY_BACKEND_URL": "https://paigy.ai" }
     }
   }

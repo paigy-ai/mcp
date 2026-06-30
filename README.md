@@ -22,7 +22,7 @@ approve).
 ### Or add the MCP directly
 
 ```
-claude mcp add paigy -s user -- npx -y @paigy/mcp
+claude mcp add paigy -s user -- npx -y @paigy/mcp@latest
 ```
 
 ## Choosing how the user answers

@@ -20,4 +20,4 @@ Do not end your turn on "tell me once you've approved" — the poll is automatic
 just keep calling `pair`. Once it returns the token, retry whatever you were doing.
 
 Fallback (older MCP without the `pair` tool): have the user run
-`npx -y @paigy/mcp paigy-mcp-onboard` in their shell and approve in the browser.
+`npx -y @paigy/mcp@latest paigy-mcp-onboard` in their shell and approve in the browser.
