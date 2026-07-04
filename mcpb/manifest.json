@@ -1,0 +1,41 @@
+{
+  "manifest_version": "0.3",
+  "name": "paigy",
+  "display_name": "Paigy",
+  "version": "0.8.3",
+  "description": "Text, push, or call your phone when an agent needs input mid-task — reply by voice instead of babysitting a long-running or blocked terminal.",
+  "long_description": "Paigy is a voice inbox for AI coding agents. When an agent needs your input — mid-task, blocked, or done with something long-running — it can text, push, ring your phone with a banner, or place an actual phone call and read the question aloud, so you can reply by voice instead of babysitting a terminal.\n\nWithout Paigy, a long agent session means one of two bad options: sit and watch the terminal so you don't miss the moment it needs you, or walk away and come back to a task that stalled an hour ago waiting on a question you never saw. Paigy closes that gap — the moment your agent actually needs a decision, your phone gets pulled into the loop with the level of urgency that matches the moment, so you find out immediately instead of on your next check-in. It also pairs with the native Paigy iOS app, so a call rings through like a real phone call (CallKit) even when your phone is locked.",
+  "author": {
+    "name": "Paigy",
+    "url": "https://paigy.ai"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/paigy-ai/mcp.git"
+  },
+  "homepage": "https://paigy.ai",
+  "documentation": "https://github.com/paigy-ai/mcp",
+  "support": "https://github.com/paigy-ai/mcp/issues",
+  "icon": "icon.png",
+  "server": {
+    "type": "node",
+    "entry_point": "server/node_modules/@paigy/mcp/dist/index.js",
+    "mcp_config": {
+      "command": "node",
+      "args": ["${__dirname}/server/node_modules/@paigy/mcp/dist/index.js"],
+      "env": {
+        "PAIGY_AGENT": "${user_config.paigy_agent}"
+      }
+    }
+  },
+  "keywords": ["notifications", "voice", "phone", "agents", "productivity", "communication"],
+  "license": "MIT",
+  "user_config": {
+    "paigy_agent": {
+      "type": "string",
+      "title": "Agent label",
+      "description": "Label shown on Paigy notifications for this agent (defaults to \"mcp-agent\" if left blank).",
+      "required": false
+    }
+  }
+}
