@@ -5,7 +5,7 @@
     {
       "name": "paigy",
       "source": "./",
-      "description": "Paigy — a voice inbox for your AI agents.",
+      "description": "Paigy — text, push, or call your phone when an agent needs input. Talk back instead of babysitting a long-running or blocked task.",
       "homepage": "https://paigy.ai"
     }
   ]
