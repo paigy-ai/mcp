@@ -1,6 +1,6 @@
 # Paigy — MCP server
 
-A voice inbox for your AI agents. When an agent needs your input — mid-task, blocked, or done with something long-running — it can text, push, ring your phone with a banner, or place an actual phone call and read the question aloud, so you can reply by voice instead of babysitting a terminal.
+A voice inbox for your AI agents. When an agent needs your input — mid-task, blocked, or done with something long-running — it can place an actual phone call and read the question aloud, text, push, or ring your phone with a banner, so you can reply by voice instead of babysitting a terminal.
 
 Without Paigy, a long agent session means one of two bad options: sit and watch the terminal so you don't miss the moment it needs you, or walk away and come back to a task that stalled an hour ago waiting on a question you never saw. Paigy closes that gap — the moment your agent actually needs a decision, your phone gets pulled into the loop with the level of urgency that matches the moment (a silent inbox card, a quiet push, a banner, or a real ringing call), so you find out immediately instead of on your next check-in. Answer by voice or text and the reply lands back with the agent exactly like any other tool response, so it just continues — no copy-pasting, no reopening the terminal. It also pairs with the native Paigy iOS app, so a call rings through like a real phone call (CallKit) even when your phone is locked, and you can glance at or reply to anything from the lock screen.
 

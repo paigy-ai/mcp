@@ -1,6 +1,6 @@
 {
   "name": "paigy",
-  "description": "Text, push, or call the user's phone when you need input mid-task — get their answer by voice or reply, then continue. For long-running or blocked agent work.",
+  "description": "Call, text, or push the user's phone when you need input mid-task — get their answer by voice or reply, then continue. For long-running or blocked agent work.",
   "version": "0.2.2",
   "author": { "name": "Paigy" },
   "homepage": "https://paigy.ai",
