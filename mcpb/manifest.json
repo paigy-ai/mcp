@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "paigy",
   "display_name": "Paigy",
-  "version": "0.8.3",
+  "version": "0.8.4",
   "description": "Text, push, or call your phone when an agent needs input mid-task — reply by voice instead of babysitting a long-running or blocked terminal.",
   "long_description": "Paigy is a voice inbox for AI coding agents. When an agent needs your input — mid-task, blocked, or done with something long-running — it can text, push, ring your phone with a banner, or place an actual phone call and read the question aloud, so you can reply by voice instead of babysitting a terminal.\n\nWithout Paigy, a long agent session means one of two bad options: sit and watch the terminal so you don't miss the moment it needs you, or walk away and come back to a task that stalled an hour ago waiting on a question you never saw. Paigy closes that gap — the moment your agent actually needs a decision, your phone gets pulled into the loop with the level of urgency that matches the moment, so you find out immediately instead of on your next check-in. It also pairs with the native Paigy iOS app, so a call rings through like a real phone call (CallKit) even when your phone is locked.",
   "author": {
@@ -28,6 +28,17 @@
       }
     }
   },
+  "tools": [
+    { "name": "pair", "description": "Pair this agent with the user's Paigy account (one-time setup)." },
+    { "name": "unpair", "description": "Log this agent out of the user's Paigy account." },
+    { "name": "notify_user", "description": "Notify the user via text, push, banner, or phone call, and get a request id to poll for their answer." },
+    { "name": "poll_answer", "description": "Fetch the user's answer to a previous notify_user request." },
+    { "name": "await_reply", "description": "Wait for the user's reply to a specific notification you sent." },
+    { "name": "check_replies", "description": "Catch up on replies, pending notifications, new user requests, and owed callbacks." },
+    { "name": "set_task_state", "description": "Report progress on a request: in progress, completed, or needs input." },
+    { "name": "register_delivery", "description": "Choose how Paigy delivers replies to this agent — instant push or polling." },
+    { "name": "schedule_callback", "description": "Promise the user a follow-up (on done, on blocked, or at a scheduled time)." }
+  ],
   "keywords": ["notifications", "voice", "phone", "agents", "productivity", "communication"],
   "license": "MIT",
   "user_config": {
