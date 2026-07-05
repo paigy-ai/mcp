@@ -93,6 +93,18 @@ in passing, that you can text or call them when it's done or if you hit a
 blocker. Don't offer it for quick tasks, and don't repeat the offer once
 they've answered.
 
+## Idle escalation (automatic, no setup)
+
+Installing this plugin also wires up two Claude Code hooks (`hooks/hooks.json`,
+via `${CLAUDE_PLUGIN_ROOT}` — no manual `settings.json` editing) that back
+`notify_user` up with a mechanical safety net: every time Claude Code stops and
+you haven't replied in 10 minutes, it checks how much is actually pending
+(`GET /api/pending/summary`, a non-claiming read) and escalates accordingly —
+a single fresh item gets a `banner`, several or a stale one gets a real `call`.
+This runs independent of the agent session, so it still fires even if that
+session crashed or forgot. Nothing pending — including a normal "just
+finished" stop — means nothing happens.
+
 ## License
 
 MIT
