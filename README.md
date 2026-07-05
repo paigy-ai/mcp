@@ -66,7 +66,8 @@ receiving messages.
 ## Choosing how the user answers
 
 `notify_user` should ask in the shape that's fastest to answer — don't leave a
-decision as free text. Pick with `select` (and `options`):
+decision as free text. `select` is required (no silent default); pick it with
+`options` where the shape needs them:
 
 | You need… | Use | Answer comes back as |
 |---|---|---|
@@ -75,7 +76,11 @@ decision as free text. Pick with `select` (and `options`):
 | **Pick several** | `options` + `select:"many"` | `{kind:"multi", optionIds}` |
 | **Rank / order a subset** | `options` + `select:"rank"` | `{kind:"ranked", optionIds}` |
 | **A visual choice** | options with an `html` or `image` preview | one of the above |
-| **An open-ended reply** | no options | `{kind:"text", text}` |
+| **An open-ended reply** | `select:"text"`, no options | `{kind:"text", text}` |
+
+Options carry no ids you assign — the backend positions them ("1", "2", …)
+and answers reference those. `one`/`many`/`rank` require `options`;
+`confirm`/`text` forbid them.
 
 `confirm` is **answerable straight from the banner** (Yes/No or Approve/Deny
 buttons). Other paiges get banner actions **See Options · Hear them · Remind me
