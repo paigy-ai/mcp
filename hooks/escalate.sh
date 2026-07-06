@@ -1,12 +1,11 @@
 #!/usr/bin/env bash
 # Armed by on-stop.sh on EVERY turn end. Sleeps 10 min, then checks whether the
-# user has responded AND how much is actually pending — using a dedicated
-# non-claiming endpoint (/api/pending/summary) so this never consumes
-# replies/requests meant for the real agent session's own check_replies/await_reply.
+# user has responded AND how much is actually pending — using dedicated
+# non-claiming endpoints so this never consumes replies/requests meant for the
+# real agent session's own check_replies/await_reply.
 #
 # No content heuristic on arming: this arms on every stop, blocking or not
-# (accepted tradeoff) — the urgency chosen at escalation time is what scales with
-# how much is actually blocked. 0 pending = skip entirely.
+# (accepted tradeoff). 0 pending = skip entirely.
 set -euo pipefail
 
 SESSION_ID="${1:?session_id required}"
@@ -33,22 +32,25 @@ TOKEN=$(node -e "console.log(JSON.parse(require('fs').readFileSync(process.argv[
 [ -n "$TOKEN" ] || exit 0
 
 SUMMARY=$(curl -sS -X GET "$BACKEND_URL/api/pending/summary" -H "authorization: Bearer $TOKEN" 2>/dev/null) || exit 0
-
-# Two distinct things can need attention: the agent's own still-unanswered
-# questions (count/items), and replies/requests the USER already sent that no
-# agent has picked up yet (unacknowledged/unacknowledgedItems) — e.g. they
-# answered via the app, but this Claude Code session already stopped and
-# nothing else will notice, so they need to know to reopen it. Both come from
-# the same non-claiming endpoint, so this never consumes anything meant for
-# the real agent session's own check_replies/await_reply.
 COUNT=$(echo "$SUMMARY" | node -e "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{try{console.log(JSON.parse(d).count||0)}catch{console.log(0)}})" 2>/dev/null) || COUNT=0
 UNACK=$(echo "$SUMMARY" | node -e "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{try{console.log(JSON.parse(d).unacknowledged||0)}catch{console.log(0)}})" 2>/dev/null) || UNACK=0
 [ "$((COUNT + UNACK))" -gt 0 ] || exit 0
 
-# Real titles of what's actually pending — the whole point of the escalation is
-# telling the user WHAT needs them and WHAT decision it needs, not just "something
-# is pending" (confirmed by real user feedback: a bare "N things waiting" call was
-# useless without saying what).
+# Try the real call path first: pulls the oldest call-eligible pending item forward
+# to ring now and marks every other one coalesced, so the bot drains them into that
+# one call (call-coalescing-design.md's "Idle-escalation integration") instead of
+# reading a bundled digest with no pause between unrelated items. If nothing is
+# call-eligible (escalated:false — everything pending is banner/inbox-level, or it's
+# purely unacknowledged replies/requests with nothing to ring about), fall through
+# to a plain text reminder below.
+ESCALATE_RESULT=$(curl -sS -X POST "$BACKEND_URL/api/pending/escalate-call" -H "authorization: Bearer $TOKEN" 2>/dev/null) || ESCALATE_RESULT=""
+ESCALATED=$(echo "$ESCALATE_RESULT" | node -e "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{try{console.log(JSON.parse(d).escalated===true?'1':'0')}catch{console.log('0')}})" 2>/dev/null) || ESCALATED="0"
+[ "$ESCALATED" = "1" ] && exit 0
+
+# Fallback: a plain banner/text reminder — never "call" here, since anything
+# call-eligible already went through escalate-call above. Real titles of what's
+# actually pending, not just a bare count (confirmed by real user feedback: a bare
+# "N things waiting" call was useless without saying what).
 ITEMS_JSON=$(echo "$SUMMARY" | node -e "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{try{console.log(JSON.stringify(JSON.parse(d).items||[]))}catch{console.log('[]')}})" 2>/dev/null) || ITEMS_JSON="[]"
 UNACK_ITEMS_JSON=$(echo "$SUMMARY" | node -e "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{try{console.log(JSON.stringify(JSON.parse(d).unacknowledgedItems||[]))}catch{console.log('[]')}})" 2>/dev/null) || UNACK_ITEMS_JSON="[]"
 
@@ -59,27 +61,13 @@ curl -sS -X POST "$BACKEND_URL/api/notify" \
   -H "authorization: Bearer $TOKEN" \
   -H "content-type: application/json" \
   -d "$(node -e '
-    const [countStr, unackStr, project, itemsJson, unackItemsJson, armedAtStr, nowIso] = process.argv.slice(1);
-    const count = Number(countStr);
+    const [unackStr, project, itemsJson, unackItemsJson, nowIso] = process.argv.slice(1);
     const unack = Number(unackStr);
     const items = JSON.parse(itemsJson);
     const unackItems = JSON.parse(unackItemsJson);
-    const armedAt = Number(armedAtStr);
 
-    // Merge both kinds of item (still-pending questions, unpicked-up replies)
-    // oldest-first — a bare count is never enough on its own (confirmed by real
-    // user feedback twice now): the title must lead with the actual thing, not
-    // just how many there are.
     const allItems = [...items, ...unackItems].sort((a, b) => a.createdAt.localeCompare(b.createdAt));
     const allTitles = allItems.map((i) => i.title);
-
-    // Urgency scales with what is actually blocked: multiple things, or the
-    // oldest one being stale a while, escalate to a call; a single fresh one
-    // gets a banner instead of ringing the phone outright.
-    const allTimes = allItems.map((i) => new Date(i.createdAt).getTime() / 1000);
-    const oldestAgeMin = allTimes.length > 0 ? (armedAt - Math.min(...allTimes)) / 60 : 0;
-    const total = count + unack;
-    const urgency = total >= 2 || oldestAgeMin >= 20 ? "call" : "banner";
 
     let title;
     if (allTitles.length === 0) {
@@ -90,8 +78,6 @@ curl -sS -X POST "$BACKEND_URL/api/notify" \
       title = allTitles[0] + " (+" + (allTitles.length - 1) + " more)";
     }
 
-    // Full list as its own chunks so the user can ask to expand any one —
-    // skipped when there is exactly one, since the title already is it.
     const description = allTitles.length > 1 ? allTitles.slice() : [];
     if (unack > 0) {
       description.push("Reopen the session to pick up your reply — nothing else will.");
@@ -103,6 +89,6 @@ curl -sS -X POST "$BACKEND_URL/api/notify" \
       description.push("Waiting on you for at least 10 minutes, but could not retrieve what it is about.");
     }
 
-    console.log(JSON.stringify({ context: { title, description }, select: "text", urgency, createdAt: nowIso }));
-  ' "$COUNT" "$UNACK" "$PROJECT_NAME" "$ITEMS_JSON" "$UNACK_ITEMS_JSON" "$ARMED_AT" "$NOW_ISO")" \
+    console.log(JSON.stringify({ context: { title, description }, select: "text", urgency: "banner", createdAt: nowIso }));
+  ' "$UNACK" "$PROJECT_NAME" "$ITEMS_JSON" "$UNACK_ITEMS_JSON" "$NOW_ISO")" \
   >/dev/null 2>&1 || true

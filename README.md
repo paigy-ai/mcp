@@ -95,15 +95,24 @@ they've answered.
 
 ## Idle escalation (automatic, no setup)
 
-Installing this plugin also wires up two Claude Code hooks (`hooks/hooks.json`,
+Installing this plugin also wires up Claude Code hooks (`hooks/hooks.json`,
 via `${CLAUDE_PLUGIN_ROOT}` — no manual `settings.json` editing) that back
-`notify_user` up with a mechanical safety net: every time Claude Code stops and
-you haven't replied in 10 minutes, it checks how much is actually pending
-(`GET /api/pending/summary`, a non-claiming read) and escalates accordingly —
-a single fresh item gets a `banner`, several or a stale one gets a real `call`.
-This runs independent of the agent session, so it still fires even if that
-session crashed or forgot. Nothing pending — including a normal "just
-finished" stop — means nothing happens.
+`notify_user` up with a mechanical safety net, independent of the agent
+session — it still fires even if that session crashed or forgot:
+
+- **10-minute check** (`escalate.sh`): how much is actually pending
+  (`GET /api/pending/summary`, a non-claiming read) — a single fresh item
+  gets a `banner`, several or a stale one gets a real `call` (routed through
+  the same call-coalescing the bot uses, so several ringing things fold into
+  one call instead of ringing separately).
+- **2-minute check** (`quick-check.sh`): a narrower, faster check for a
+  different case — you already replied to something (via the app), but no
+  agent has engaged with it yet. That's not "nothing happened" (escalate.sh's
+  job), it's "the agent's session may have already stopped and nothing else
+  will notice" — worth a faster nudge to reopen it.
+
+Nothing pending/unacknowledged — including a normal "just finished" stop —
+means neither check does anything.
 
 ## License
 
