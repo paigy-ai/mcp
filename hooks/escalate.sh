@@ -39,6 +39,11 @@ COUNT=$(echo "$SUMMARY" | node -e "let d='';process.stdin.on('data',c=>d+=c);pro
 [ "$COUNT" -gt 0 ] || exit 0
 
 OLDEST=$(echo "$SUMMARY" | node -e "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{try{console.log(JSON.parse(d).oldestCreatedAt||'')}catch{console.log('')}})" 2>/dev/null) || OLDEST=""
+# Real titles of what's actually pending — the whole point of the escalation is
+# telling the user WHAT needs them and WHAT decision it needs, not just "something
+# is pending" (confirmed by real user feedback: a bare "N things waiting" call was
+# useless without saying what).
+ITEMS_JSON=$(echo "$SUMMARY" | node -e "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{try{console.log(JSON.stringify(JSON.parse(d).items||[]))}catch{console.log('[]')}})" 2>/dev/null) || ITEMS_JSON="[]"
 
 # Urgency scales with what's actually blocked: multiple pending things, or the
 # oldest one being stale a while, escalate to a call; a single fresh one gets a
@@ -61,16 +66,21 @@ curl -sS -X POST "$BACKEND_URL/api/notify" \
   -H "authorization: Bearer $TOKEN" \
   -H "content-type: application/json" \
   -d "$(node -e '
-    const [count, project, urgency] = [process.argv[1], process.argv[2], process.argv[3]];
+    const [count, project, urgency, itemsJson] = [process.argv[1], process.argv[2], process.argv[3], process.argv[4]];
+    const items = JSON.parse(itemsJson);
     const title = count > 1
-      ? "Claude Code has " + count + " things waiting on you"
-      : "Claude Code has been waiting on you";
-    const desc = "It has been at least 10 minutes since Claude Code stopped and needed your input in " + project + ", with no reply yet.";
+      ? "Claude Code has " + count + " things waiting on you in " + project
+      : "Claude Code needs you in " + project;
+    // Each pending item'"'"'s actual question as its own chunk — the user can ask
+    // to expand any one instead of getting a useless "something is pending".
+    const description = items.length > 0
+      ? items.map(i => i.title)
+      : ["Waiting on you for at least 10 minutes, but couldn'"'"'t retrieve what it'"'"'s about."];
     console.log(JSON.stringify({
-      context: { title, description: [desc] },
+      context: { title, description },
       select: "text",
       urgency,
-      createdAt: process.argv[4],
+      createdAt: process.argv[5],
     }));
-  ' "$COUNT" "$PROJECT_NAME" "$URGENCY" "$NOW_ISO")" \
+  ' "$COUNT" "$PROJECT_NAME" "$URGENCY" "$ITEMS_JSON" "$NOW_ISO")" \
   >/dev/null 2>&1 || true
