@@ -71,11 +71,10 @@ curl -sS -X POST "$BACKEND_URL/api/notify" \
     const title = count > 1
       ? "Claude Code has " + count + " things waiting on you in " + project
       : "Claude Code needs you in " + project;
-    // Each pending item'"'"'s actual question as its own chunk — the user can ask
-    // to expand any one instead of getting a useless "something is pending".
+    // Each pending item description as its own chunk so the user can ask to expand it.
     const description = items.length > 0
       ? items.map(i => i.title)
-      : ["Waiting on you for at least 10 minutes, but couldn'"'"'t retrieve what it'"'"'s about."];
+      : ["Waiting on you for at least 10 minutes, but could not retrieve what it is about."];
     console.log(JSON.stringify({
       context: { title, description },
       select: "text",
