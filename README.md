@@ -108,8 +108,11 @@ session — it still fires even if that session crashed or forgot:
 - **2-minute check** (`quick-check.sh`): a narrower, faster check for a
   different case — you already replied to something (via the app), but no
   agent has engaged with it yet. That's not "nothing happened" (escalate.sh's
-  job), it's "the agent's session may have already stopped and nothing else
-  will notice" — worth a faster nudge to reopen it.
+  job), it's "the agent hasn't looked." It first tries to actually wake the
+  agent — a headless `claude -p --resume` scoped to just the tools it needs
+  to check_replies and engage — so the reply gets picked up without you
+  doing anything. Only if that's unavailable or fails does it fall back to
+  a plain nudge telling you to reopen the session yourself.
 
 Nothing pending/unacknowledged — including a normal "just finished" stop —
 means neither check does anything.

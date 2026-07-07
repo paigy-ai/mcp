@@ -3,8 +3,14 @@
 # sooner (2 min vs 10) and checks a narrower thing: did the user already reply/
 # request something that no agent has engaged with yet (unacknowledged)? That's
 # different from "the user hasn't answered at all" (escalate.sh's job) — an
-# unacknowledged reply means they already did their part; if the agent's session
-# has genuinely stopped, nothing else will notice unless told to reopen it.
+# unacknowledged reply means they already did their part; the agent's own
+# session just hasn't looked yet.
+#
+# Tries to actually wake the agent first: a headless `claude -p --resume` that
+# calls check_replies itself and engages with whatever it finds — this is what
+# the user actually asked for, not "tell the human to go reopen it". Only if
+# that's unavailable or fails does this fall back to notifying the human
+# directly (the old behavior, kept as a safety net).
 #
 # This does NOT replace escalate.sh's 10-min check — both fire from every stop;
 # if the same items are still unacknowledged at 10 min, escalate.sh's own
@@ -36,6 +42,20 @@ SUMMARY=$(curl -sS -X GET "$BACKEND_URL/api/pending/summary" -H "authorization: 
 UNACK=$(echo "$SUMMARY" | node -e "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{try{console.log(JSON.parse(d).unacknowledged||0)}catch{console.log(0)}})" 2>/dev/null) || UNACK=0
 [ "$UNACK" -gt 0 ] || exit 0
 
+# Try waking the agent itself first: a headless resume, scoped to just the
+# tools it needs to catch up and act (no blanket permission bypass). If this
+# succeeds, the agent has already engaged — nothing more to do here.
+if command -v claude >/dev/null 2>&1; then
+  if claude -p --resume "$SESSION_ID" \
+      --allowedTools="mcp__paigy__check_replies,mcp__paigy__set_task_state,mcp__paigy__notify_user,mcp__paigy__await_reply,mcp__paigy__schedule_callback" \
+      "You've been idle 2+ minutes with a user reply/request that no agent has picked up yet. Call check_replies now and engage with whatever it returns (set_task_state on anything you start acting on)." \
+      >/dev/null 2>&1; then
+    exit 0
+  fi
+fi
+
+# Fallback: the agent couldn't be woken (claude not on PATH, resume failed,
+# timed out) — notify the human directly so they know to reopen it themselves.
 UNACK_ITEMS_JSON=$(echo "$SUMMARY" | node -e "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{try{console.log(JSON.stringify(JSON.parse(d).unacknowledgedItems||[]))}catch{console.log('[]')}})" 2>/dev/null) || UNACK_ITEMS_JSON="[]"
 PROJECT_NAME=$(basename "$CWD")
 NOW_ISO=$(date -u +"%Y-%m-%dT%H:%M:%S.000Z")
