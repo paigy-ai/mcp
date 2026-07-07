@@ -8,6 +8,14 @@
 # (accepted tradeoff). 0 pending = skip entirely.
 set -euo pipefail
 
+# A user shell with FORCE_COLOR set globally makes `node -e "console.log(...)"`
+# wrap output in ANSI codes even when piped, corrupting every numeric/JSON
+# parse below (hit this live: `[ "$UNACK" -gt 0 ]` failed on "\e[33m0\e[39m").
+# NO_COLOR is the standard opt-out; FORCE_COLOR=0 belts-and-braces it for
+# Node specifically, since some versions honor FORCE_COLOR over NO_COLOR.
+export NO_COLOR=1
+export FORCE_COLOR=0
+
 SESSION_ID="${1:?session_id required}"
 CWD="${2:-unknown project}"
 ARMED_AT=$(date +%s)

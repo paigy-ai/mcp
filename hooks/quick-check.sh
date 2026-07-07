@@ -6,17 +6,31 @@
 # unacknowledged reply means they already did their part; the agent's own
 # session just hasn't looked yet.
 #
-# Tries to actually wake the agent first: a headless `claude -p --resume` that
-# calls check_replies itself and engages with whatever it finds — this is what
-# the user actually asked for, not "tell the human to go reopen it". Only if
-# that's unavailable or fails does this fall back to notifying the human
-# directly (the old behavior, kept as a safety net).
+# Tries to actually wake an agent first: a headless, FRESH `claude -p` (no
+# --resume) that calls check_replies itself and acknowledges naturally —
+# this is what the user actually asked for ("the agent should check", not
+# "tell the human to go reopen it"), but deliberately NOT via --resume:
+# resuming the user's own live session would inject a fake "user" turn into
+# a transcript they might be actively looking at (or typing in) right then —
+# a real double-writer risk with no upside, since the whole point is just to
+# notice and acknowledge, not to carry forward this session's exact context.
+# A fresh session can't act with full history, but it CAN check_replies,
+# engage/set_task_state, and post a natural acknowledgment via notify_user —
+# which the user sees as a normal message from the agent, not a system nudge.
+# Only if a fresh session is unavailable or fails does this fall back to
+# notifying the human directly (the old behavior, kept as a safety net).
 #
 # This does NOT replace escalate.sh's 10-min check — both fire from every stop;
 # if the same items are still unacknowledged at 10 min, escalate.sh's own
 # fallback covers them too. A repeated nudge for something genuinely still
 # unaddressed is expected, not a bug.
 set -euo pipefail
+
+# See escalate.sh for why: a user shell with FORCE_COLOR set globally makes
+# `node -e "console.log(...)"` wrap output in ANSI codes even when piped,
+# corrupting every numeric/JSON parse below.
+export NO_COLOR=1
+export FORCE_COLOR=0
 
 SESSION_ID="${1:?session_id required}"
 CWD="${2:-unknown project}"
@@ -42,14 +56,14 @@ SUMMARY=$(curl -sS -X GET "$BACKEND_URL/api/pending/summary" -H "authorization: 
 UNACK=$(echo "$SUMMARY" | node -e "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{try{console.log(JSON.parse(d).unacknowledged||0)}catch{console.log(0)}})" 2>/dev/null) || UNACK=0
 [ "$UNACK" -gt 0 ] || exit 0
 
-# Try waking the agent itself first: a headless resume, scoped to just the
-# tools it needs to catch up and act (no blanket permission bypass). If this
-# succeeds, the agent has already engaged — nothing more to do here.
+# Try waking an agent itself first: a fresh headless session (same project
+# dir, no shared transcript), scoped to just the tools it needs to catch up
+# and act. If this succeeds, it has already engaged — nothing more to do here.
 if command -v claude >/dev/null 2>&1; then
-  if claude -p --resume "$SESSION_ID" \
+  if (cd "$CWD" 2>/dev/null && claude -p \
       --allowedTools="mcp__paigy__check_replies,mcp__paigy__set_task_state,mcp__paigy__notify_user,mcp__paigy__await_reply,mcp__paigy__schedule_callback" \
-      "You've been idle 2+ minutes with a user reply/request that no agent has picked up yet. Call check_replies now and engage with whatever it returns (set_task_state on anything you start acting on)." \
-      >/dev/null 2>&1; then
+      "Call check_replies via the paigy MCP now. For each reply/request no agent has engaged with yet: call set_task_state on it, then post a brief, natural acknowledgment via notify_user on its threadId — e.g. \"I see a stale notification about X, sorry I missed it — starting on it now.\" You don't have the original conversation's context, so keep it to a genuine acknowledgment plus whatever follow-up you can reasonably do without it; don't pretend to have context you don't." \
+      >/dev/null 2>&1); then
     exit 0
   fi
 fi
