@@ -108,11 +108,20 @@ session — it still fires even if that session crashed or forgot:
 - **2-minute check** (`quick-check.sh`): a narrower, faster check for a
   different case — you already replied to something (via the app), but no
   agent has engaged with it yet. That's not "nothing happened" (escalate.sh's
-  job), it's "the agent hasn't looked." It first tries to actually wake the
-  agent — a headless `claude -p --resume` scoped to just the tools it needs
-  to check_replies and engage — so the reply gets picked up without you
-  doing anything. Only if that's unavailable or fails does it fall back to
-  a plain nudge telling you to reopen the session yourself.
+  job), it's "the agent hasn't looked." It spawns a **fresh** headless
+  `claude -p` (deliberately NOT resuming your live session — no injected
+  turns in a transcript you might be typing in) scoped to just the tools it
+  needs; that agent acknowledges the missed reply with a natural message in
+  the same thread ("sorry I missed this — starting on it now"), so what you
+  see is a normal agent response, not a system nudge. Only if that's
+  unavailable or fails does it fall back to a plain nudge telling you to
+  reopen the session yourself.
+
+Hooks are the *dead-session* safety net. A live-but-idle agent shouldn't
+need them: the MCP server instructions tell every paired agent to schedule
+its own ~2-minute wake-up (harness `ScheduleWakeup` or equivalent) and
+`check_replies` whenever it ends a turn with anything possibly pending —
+self-polling in its own session, full context intact.
 
 Nothing pending/unacknowledged — including a normal "just finished" stop —
 means neither check does anything.
