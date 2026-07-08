@@ -12,7 +12,7 @@
       "command": "npx",
       "args": [
         "-y",
-        "@paigy/mcp@0.14.1"
+        "@paigy/mcp@latest"
       ],
       "env": {
         "PAIGY_BACKEND_URL": "https://paigy.ai"
