@@ -1,15 +1,22 @@
 {
   "name": "paigy",
-  "description": "Call, text, or push the user's phone when you need input mid-task — get their answer by voice or reply, then continue. For long-running or blocked agent work.",
-  "version": "0.2.8",
-  "author": { "name": "Paigy" },
+  "description": "Call, text, or push the user's phone when you need input mid-task \u2014 get their answer by voice or reply, then continue. For long-running or blocked agent work.",
+  "version": "0.2.9",
+  "author": {
+    "name": "Paigy"
+  },
   "homepage": "https://paigy.ai",
   "license": "MIT",
   "mcpServers": {
     "paigy": {
       "command": "npx",
-      "args": ["-y", "@paigy/mcp@latest"],
-      "env": { "PAIGY_BACKEND_URL": "https://paigy.ai" }
+      "args": [
+        "-y",
+        "@paigy/mcp@latest"
+      ],
+      "env": {
+        "PAIGY_BACKEND_URL": "https://paigy.ai"
+      }
     }
   }
 }

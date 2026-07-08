@@ -65,17 +65,36 @@ UNACK_ITEMS_JSON=$(echo "$SUMMARY" | node -e "let d='';process.stdin.on('data',c
 PROJECT_NAME=$(basename "$CWD")
 NOW_ISO=$(date -u +"%Y-%m-%dT%H:%M:%S.000Z")
 
-curl -sS -X POST "$BACKEND_URL/api/notify" \
-  -H "authorization: Bearer $TOKEN" \
-  -H "content-type: application/json" \
-  -d "$(node -e '
-    const [unackStr, project, itemsJson, unackItemsJson, nowIso] = process.argv.slice(1);
+# Digest threading (paigy-ai/mcp#19): every run used to mint a NEW "(+N more)" card,
+# and each new digest counted the previous ones — a user's inbox stacked four
+# near-identical cards over a night. Persist the digest thread so each send
+# supersedes the last card (the server replaces it and silences its ring ladder),
+# and filter our own previous digests out of the titles we roll up.
+DIGEST_STATE="$HOME/.paigy/idle-escalation/digest.json"
+DIGEST_THREAD=""
+DIGEST_TITLE=""
+if [ -f "$DIGEST_STATE" ]; then
+  DIGEST_THREAD=$(node -e "try{console.log(JSON.parse(require('fs').readFileSync(process.argv[1],'utf8')).threadId||'')}catch{console.log('')}" "$DIGEST_STATE" 2>/dev/null) || DIGEST_THREAD=""
+  DIGEST_TITLE=$(node -e "try{console.log(JSON.parse(require('fs').readFileSync(process.argv[1],'utf8')).title||'')}catch{console.log('')}" "$DIGEST_STATE" 2>/dev/null) || DIGEST_TITLE=""
+fi
+
+BODY=$(node -e '
+    const [unackStr, project, itemsJson, unackItemsJson, nowIso, digestThread, digestTitle] = process.argv.slice(1);
     const unack = Number(unackStr);
     const items = JSON.parse(itemsJson);
     const unackItems = JSON.parse(unackItemsJson);
 
-    const allItems = [...items, ...unackItems].sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+    // Never roll our own previous digests into the count: the exact stored title,
+    // plus anything digest-shaped (a "(+N more)" suffix) left over from before
+    // threading existed.
+    const isOwnDigest = (t) => t === digestTitle || /\(\+\d+ more\)$/.test(t);
+    const allItems = [...items, ...unackItems]
+      .filter((i) => !isOwnDigest(i.title))
+      .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
     const allTitles = allItems.map((i) => i.title);
+
+    // Nothing real left (only our own digests were pending) → send nothing.
+    if (allTitles.length === 0 && unack === 0) { console.log(""); process.exit(0); }
 
     let title;
     if (allTitles.length === 0) {
@@ -97,6 +116,26 @@ curl -sS -X POST "$BACKEND_URL/api/notify" \
       description.push("Waiting on you for at least 10 minutes, but could not retrieve what it is about.");
     }
 
-    console.log(JSON.stringify({ context: { title, description }, select: "text", urgency: "banner", createdAt: nowIso }));
-  ' "$UNACK" "$PROJECT_NAME" "$ITEMS_JSON" "$UNACK_ITEMS_JSON" "$NOW_ISO")" \
-  >/dev/null 2>&1 || true
+    const body = { context: { title, description }, select: "text", urgency: "banner", createdAt: nowIso };
+    if (digestThread) body.threadId = digestThread;
+    console.log(JSON.stringify(body));
+  ' "$UNACK" "$PROJECT_NAME" "$ITEMS_JSON" "$UNACK_ITEMS_JSON" "$NOW_ISO" "$DIGEST_THREAD" "$DIGEST_TITLE") || exit 0
+[ -n "$BODY" ] || exit 0
+
+RESP=$(curl -sS -X POST "$BACKEND_URL/api/notify" \
+  -H "authorization: Bearer $TOKEN" \
+  -H "content-type: application/json" \
+  -d "$BODY" 2>/dev/null) || exit 0
+
+# Remember this digest (thread + exact title) so the next run supersedes it and
+# excludes it from the roll-up.
+node -e '
+    const [respJson, bodyJson, statePath] = process.argv.slice(1);
+    try {
+      const resp = JSON.parse(respJson);
+      const body = JSON.parse(bodyJson);
+      if (resp.threadId) {
+        require("fs").writeFileSync(statePath, JSON.stringify({ threadId: resp.threadId, title: body.context.title }));
+      }
+    } catch {}
+  ' "$RESP" "$BODY" "$DIGEST_STATE" 2>/dev/null || true
