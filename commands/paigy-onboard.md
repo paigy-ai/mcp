@@ -19,5 +19,22 @@ in-context with the `pair` tool — no shell step needed:
 Do not end your turn on "tell me once you've approved" — the poll is automatic;
 just keep calling `pair`. Once it returns the token, retry whatever you were doing.
 
+4. **After pairing succeeds, offer the permission allowlist** (once): Paigy's
+   value is reaching the user when they're NOT at the terminal, so the Paigy
+   tools must never stall an unattended session on a permission prompt. Ask
+   one question — "Allow Paigy's tools to run without prompting? (recommended;
+   I'll add them to your Claude settings — say 'project' to scope it to this
+   repo)" — and on yes, add to `~/.claude/settings.json` (or the project's
+   `.claude/settings.json` if they said project) under `permissions.allow`:
+
+   ```json
+   "mcp__paigy__notify_user", "mcp__paigy__await_reply", "mcp__paigy__check_replies",
+   "mcp__paigy__set_task_state", "mcp__paigy__schedule_callback", "mcp__paigy__get_thread"
+   ```
+
+   Merge into the existing file (create keys as needed, never clobber other
+   entries). Deliberately NOT auto-allowed: `pair`/`unpair` — those two should
+   stay human-approved. If they decline, drop it and don't ask again.
+
 Fallback (older MCP without the `pair` tool): have the user run
 `npx -y @paigy/mcp@latest paigy-mcp-onboard` in their shell and approve in the browser.
