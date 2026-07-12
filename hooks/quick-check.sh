@@ -14,9 +14,11 @@
 # a transcript they might be actively looking at (or typing in) right then —
 # a real double-writer risk with no upside, since the whole point is just to
 # notice and acknowledge, not to carry forward this session's exact context.
-# A fresh session can't act with full history, but it CAN check_replies,
-# engage/set_task_state, and post a natural acknowledgment via notify_user —
-# which the user sees as a normal message from the agent, not a system nudge.
+# A fresh session doesn't inherit the dead session's context, but it CAN
+# check_replies, rehydrate a resumed/seeded conversation via get_thread
+# (#57/#251 — the thread IS the session state), engage/set_task_state, and
+# post a natural acknowledgment via notify_user — which the user sees as a
+# normal message from the agent, not a system nudge.
 # Only if a fresh session is unavailable or fails does this fall back to
 # notifying the human directly (the old behavior, kept as a safety net).
 #
@@ -61,8 +63,8 @@ UNACK=$(echo "$SUMMARY" | node -e "let d='';process.stdin.on('data',c=>d+=c);pro
 # and act. If this succeeds, it has already engaged — nothing more to do here.
 if command -v claude >/dev/null 2>&1; then
   if (cd "$CWD" 2>/dev/null && claude -p \
-      --allowedTools="mcp__paigy__check_replies,mcp__paigy__set_task_state,mcp__paigy__notify_user,mcp__paigy__await_reply,mcp__paigy__schedule_callback" \
-      "Call check_replies via the paigy MCP now. For each reply/request no agent has engaged with yet: call set_task_state on it, then post a brief, natural acknowledgment via notify_user on its threadId — e.g. \"I see a stale notification about X, sorry I missed it — starting on it now.\" You don't have the original conversation's context, so keep it to a genuine acknowledgment plus whatever follow-up you can reasonably do without it; don't pretend to have context you don't." \
+      --allowedTools="mcp__paigy__check_replies,mcp__paigy__get_thread,mcp__paigy__set_task_state,mcp__paigy__notify_user,mcp__paigy__await_reply,mcp__paigy__schedule_callback" \
+      "Call check_replies via the paigy MCP now. If a request carries a contextThreadId, or lands on a threadId from a conversation you don't have, the user is resuming or seeding a past conversation: call get_thread on it FIRST and treat the transcript as prior conversation you were part of — then continue it for real. For every other reply/request no agent has engaged with yet: call set_task_state on it, then post a brief, natural acknowledgment via notify_user on its threadId — e.g. \"I see a stale notification about X, sorry I missed it — starting on it now.\" Beyond what get_thread gives you, don't pretend to have context you don't." \
       >/dev/null 2>&1); then
     exit 0
   fi
