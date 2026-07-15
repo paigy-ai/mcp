@@ -1,20 +1,19 @@
 #!/usr/bin/env bash
-# Exercises the exact token read now used by escalate.sh / quick-check.sh against every
-# shape ~/.paigy/token.json has had. Writes only to a temp dir — never touches ~/.paigy.
+# Exercises read_paigy_token — the REAL function the hooks source, not a copy of it — against
+# every shape ~/.paigy/token.json has had. Writes only to a temp dir; never touches ~/.paigy.
+# Run: hooks/token-read.test.sh
 set -uo pipefail
 export NO_COLOR=1 FORCE_COLOR=0
+HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# The thing under test is the shipped code itself — sourcing it (rather than restating the
+# read here) is the whole point: a test over a copy would pass while the hooks drifted, which
+# is exactly how the 0.22.0 breakage went unnoticed.
+. "$HERE/token.sh"
+read_token() { read_paigy_token "$1"; }
+
 TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT
 pass=0; fail=0
-
-# The read under test — kept byte-identical to the hooks.
-read_token() {
-  node -e "
-    const f = JSON.parse(require('fs').readFileSync(process.argv[1], 'utf8'));
-    const agent = process.env.PAIGY_AGENT || 'mcp-agent';
-    console.log(f.access_token ?? f[agent]?.access_token ?? f['*']?.access_token ?? '');
-  " "$1" 2>/dev/null
-}
 
 check() { # name, expected, actual
   if [ "$2" = "$3" ]; then echo "  PASS  $1"; pass=$((pass+1));

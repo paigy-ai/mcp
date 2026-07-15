@@ -16,6 +16,10 @@ set -euo pipefail
 export NO_COLOR=1
 export FORCE_COLOR=0
 
+HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=hooks/token.sh
+. "$HERE/token.sh"
+
 SESSION_ID="${1:?session_id required}"
 CWD="${2:-unknown project}"
 ARMED_AT=$(date +%s)
@@ -34,19 +38,10 @@ if [ -f "$ACTIVITY_FILE" ]; then
   fi
 fi
 
-# No token = not paired = nothing we can do.
+# No token = not paired = nothing we can do. (read_paigy_token handles every shape the
+# file has had — see hooks/token.sh.)
 [ -f "$TOKEN_FILE" ] || exit 0
-# token.json holds ONE SLOT PER AGENT keyed by PAIGY_AGENT (@paigy/mcp >= 0.22.0, so pairing
-# one agent can't clobber another's). Read every shape this file has ever had: a bare token
-# (pre-0.22.0), our own slot, then "*" (the pre-keying shared slot). Reading only
-# `.access_token` silently broke this whole hook the day keying shipped — and worse, it
-# printed the STRING "undefined", which sails past the -n guard below and rings the API with
-# `Bearer undefined`. Default to "" so a miss actually reads as a miss.
-TOKEN=$(node -e "
-  const f = JSON.parse(require('fs').readFileSync(process.argv[1], 'utf8'));
-  const agent = process.env.PAIGY_AGENT || 'mcp-agent';
-  console.log(f.access_token ?? f[agent]?.access_token ?? f['*']?.access_token ?? '');
-" "$TOKEN_FILE" 2>/dev/null) || exit 0
+TOKEN=$(read_paigy_token "$TOKEN_FILE") || exit 0
 [ -n "$TOKEN" ] || exit 0
 
 SUMMARY=$(curl -sS -X GET "$BACKEND_URL/api/pending/summary" -H "authorization: Bearer $TOKEN" 2>/dev/null) || exit 0

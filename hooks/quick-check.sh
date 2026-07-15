@@ -31,6 +31,10 @@ set -euo pipefail
 export NO_COLOR=1
 export FORCE_COLOR=0
 
+HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=hooks/token.sh
+. "$HERE/token.sh"
+
 SESSION_ID="${1:?session_id required}"
 CWD="${2:-unknown project}"
 ARMED_AT=$(date +%s)
@@ -48,12 +52,7 @@ if [ -f "$ACTIVITY_FILE" ]; then
 fi
 
 [ -f "$TOKEN_FILE" ] || exit 0
-# Every shape token.json has had — see the same read in escalate.sh for the full why.
-TOKEN=$(node -e "
-  const f = JSON.parse(require('fs').readFileSync(process.argv[1], 'utf8'));
-  const agent = process.env.PAIGY_AGENT || 'mcp-agent';
-  console.log(f.access_token ?? f[agent]?.access_token ?? f['*']?.access_token ?? '');
-" "$TOKEN_FILE" 2>/dev/null) || exit 0
+TOKEN=$(read_paigy_token "$TOKEN_FILE") || exit 0
 [ -n "$TOKEN" ] || exit 0
 
 SUMMARY=$(curl -sS -X GET "$BACKEND_URL/api/pending/summary" -H "authorization: Bearer $TOKEN" 2>/dev/null) || exit 0
