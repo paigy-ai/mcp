@@ -1,0 +1,20 @@
+{
+  "name": "paigy-ai",
+  "interface": {
+    "displayName": "Paigy AI"
+  },
+  "plugins": [
+    {
+      "name": "paigy",
+      "source": {
+        "source": "local",
+        "path": "./plugins/paigy"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

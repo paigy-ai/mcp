@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "paigy": {
+      "command": "npx",
+      "args": ["-y", "@paigy/mcp@latest"],
+      "env": {
+        "PAIGY_AGENT": "codex"
+      }
+    }
+  }
+}

@@ -27,6 +27,15 @@ prompt you to pair — run `/paigy-onboard` (opens your browser to approve).
 
 **Codex CLI:**
 ```
+codex plugin marketplace add paigy-ai/mcp --ref main
+codex plugin add paigy@paigy-ai
+npx -y -p @paigy/mcp@latest paigy-mcp-onboard
+```
+
+The plugin configures the Paigy MCP server and includes guidance for calls, replies, and callbacks. Start a new Codex session after installation.
+
+**Codex CLI — direct MCP fallback:**
+```
 codex mcp add paigy --env PAIGY_AGENT=codex -- npx -y @paigy/mcp@latest
 ```
 
