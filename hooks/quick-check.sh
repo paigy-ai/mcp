@@ -48,7 +48,12 @@ if [ -f "$ACTIVITY_FILE" ]; then
 fi
 
 [ -f "$TOKEN_FILE" ] || exit 0
-TOKEN=$(node -e "console.log(JSON.parse(require('fs').readFileSync(process.argv[1],'utf8')).access_token)" "$TOKEN_FILE" 2>/dev/null) || exit 0
+# Every shape token.json has had — see the same read in escalate.sh for the full why.
+TOKEN=$(node -e "
+  const f = JSON.parse(require('fs').readFileSync(process.argv[1], 'utf8'));
+  const agent = process.env.PAIGY_AGENT || 'mcp-agent';
+  console.log(f.access_token ?? f[agent]?.access_token ?? f['*']?.access_token ?? '');
+" "$TOKEN_FILE" 2>/dev/null) || exit 0
 [ -n "$TOKEN" ] || exit 0
 
 SUMMARY=$(curl -sS -X GET "$BACKEND_URL/api/pending/summary" -H "authorization: Bearer $TOKEN" 2>/dev/null) || exit 0

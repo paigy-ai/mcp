@@ -36,7 +36,17 @@ fi
 
 # No token = not paired = nothing we can do.
 [ -f "$TOKEN_FILE" ] || exit 0
-TOKEN=$(node -e "console.log(JSON.parse(require('fs').readFileSync(process.argv[1],'utf8')).access_token)" "$TOKEN_FILE" 2>/dev/null) || exit 0
+# token.json holds ONE SLOT PER AGENT keyed by PAIGY_AGENT (@paigy/mcp >= 0.22.0, so pairing
+# one agent can't clobber another's). Read every shape this file has ever had: a bare token
+# (pre-0.22.0), our own slot, then "*" (the pre-keying shared slot). Reading only
+# `.access_token` silently broke this whole hook the day keying shipped — and worse, it
+# printed the STRING "undefined", which sails past the -n guard below and rings the API with
+# `Bearer undefined`. Default to "" so a miss actually reads as a miss.
+TOKEN=$(node -e "
+  const f = JSON.parse(require('fs').readFileSync(process.argv[1], 'utf8'));
+  const agent = process.env.PAIGY_AGENT || 'mcp-agent';
+  console.log(f.access_token ?? f[agent]?.access_token ?? f['*']?.access_token ?? '');
+" "$TOKEN_FILE" 2>/dev/null) || exit 0
 [ -n "$TOKEN" ] || exit 0
 
 SUMMARY=$(curl -sS -X GET "$BACKEND_URL/api/pending/summary" -H "authorization: Bearer $TOKEN" 2>/dev/null) || exit 0
