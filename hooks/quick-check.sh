@@ -39,6 +39,7 @@ SESSION_ID="${1:?session_id required}"
 CWD="${2:-unknown project}"
 ARMED_AT=$(date +%s)
 ACTIVITY_FILE="$HOME/.paigy/idle-escalation/activity/${SESSION_ID}"
+STATE_DIR="$HOME/.paigy/idle-escalation"
 TOKEN_FILE="$HOME/.paigy/token.json"
 BACKEND_URL="${PAIGY_BACKEND_URL:-https://paigy.ai}"
 
@@ -84,15 +85,21 @@ fi
 
 # Fallback: the agent couldn't be woken (claude not on PATH, resume failed,
 # timed out) — notify the human directly so they know to reopen it themselves.
+# The nudge threads onto ONE persisted thread per project: a re-nudge on the same
+# thread SUPERSEDES the previous one server-side, so the inbox shows at most one
+# rollup instead of a fresh near-duplicate every run (live pile-up, 2026-07-08:
+# four "step 1 of 3 (+N more)" copies from four hook runs).
 UNACK_ITEMS_JSON=$(echo "$SUMMARY" | node -e "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{try{console.log(JSON.stringify(JSON.parse(d).unacknowledgedItems||[]))}catch{console.log('[]')}})" 2>/dev/null) || UNACK_ITEMS_JSON="[]"
 PROJECT_NAME=$(basename "$CWD")
 NOW_ISO=$(date -u +"%Y-%m-%dT%H:%M:%S.000Z")
+NUDGE_THREAD_FILE="$STATE_DIR/nudge-thread-$(echo "$CWD" | cksum | cut -d' ' -f1)"
+NUDGE_THREAD=$(cat "$NUDGE_THREAD_FILE" 2>/dev/null || true)
 
-curl -sS -X POST "$BACKEND_URL/api/notify" \
+RESPONSE=$(curl -sS -X POST "$BACKEND_URL/api/notify" \
   -H "authorization: Bearer $TOKEN" \
   -H "content-type: application/json" \
   -d "$(node -e '
-    const [project, unackItemsJson, nowIso] = process.argv.slice(1);
+    const [project, unackItemsJson, nowIso, threadId] = process.argv.slice(1);
     const unackItems = JSON.parse(unackItemsJson);
     const titles = unackItems.map((i) => i.title);
 
@@ -105,6 +112,11 @@ curl -sS -X POST "$BACKEND_URL/api/notify" \
     const description = titles.length > 1 ? titles.slice() : [];
     description.push("Reopen the session to pick this up — nothing else will after 2 minutes like this.");
 
-    console.log(JSON.stringify({ context: { title, description }, select: "text", urgency: "banner", createdAt: nowIso }));
-  ' "$PROJECT_NAME" "$UNACK_ITEMS_JSON" "$NOW_ISO")" \
-  >/dev/null 2>&1 || true
+    const body = { context: { title, description }, select: "text", urgency: "banner", createdAt: nowIso };
+    if (threadId) body.threadId = threadId;
+    console.log(JSON.stringify(body));
+  ' "$PROJECT_NAME" "$UNACK_ITEMS_JSON" "$NOW_ISO" "$NUDGE_THREAD")" \
+  2>/dev/null) || true
+
+# Persist the thread the backend assigned so every future nudge supersedes this one.
+echo "$RESPONSE" | node -e "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{try{const t=JSON.parse(d).threadId;if(t)console.log(t)}catch{}})" 2>/dev/null > "$NUDGE_THREAD_FILE.tmp" && [ -s "$NUDGE_THREAD_FILE.tmp" ] && mv "$NUDGE_THREAD_FILE.tmp" "$NUDGE_THREAD_FILE" || rm -f "$NUDGE_THREAD_FILE.tmp"
