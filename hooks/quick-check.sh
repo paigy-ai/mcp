@@ -60,7 +60,7 @@ SUMMARY=$(curl -sS -X GET "$BACKEND_URL/api/pending/summary" -H "authorization: 
 UNACK=$(echo "$SUMMARY" | node -e "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{try{console.log(JSON.parse(d).unacknowledged||0)}catch{console.log(0)}})" 2>/dev/null) || UNACK=0
 [ "$UNACK" -gt 0 ] || exit 0
 
-PAIGY_TOOLS="mcp__paigy__check_replies,mcp__paigy__get_thread,mcp__paigy__set_task_state,mcp__paigy__notify_user,mcp__paigy__await_reply,mcp__paigy__schedule_callback"
+PAIGY_TOOLS="mcp__paigy__contact,mcp__paigy__check_replies,mcp__paigy__get_thread,mcp__paigy__set_task_state,mcp__paigy__notify_user,mcp__paigy__await_reply,mcp__paigy__schedule_callback"
 
 # Rung 1: fork the stopped session — full context, no writes to the original
 # transcript. --fork-session mints a new session id, so the user's own session

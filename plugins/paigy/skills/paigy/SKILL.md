@@ -15,11 +15,13 @@ Use the Paigy MCP tools supplied by this plugin. Do not invoke a Paigy server fr
 
 ## Sending attention
 
-- **Always use `notify_user`** — never the bare `notify` tool. (Field incident 2026-07-21: a greeting sent via `notify` landed as a silent inbox item while the user waited for a call.)
-- **Prefer the simplified form**: pass `ask` (plain prose: what you need to tell the user, or find out from them) plus `urgencyHint` and `blocking`. Paigy's broker picks the channel, answer shape, and phrasing — that is its job, not yours.
-- `urgencyHint`: `"now"` when you are stopped or the moment is time-sensitive; `"soon"` when you want an answer but can keep working; `"whenever"` for FYIs. Set `blocking: true` whenever real work is stalled behind the answer — unanswered blocking asks escalate to a real phone call automatically.
-- If the user asks you to **call** them, that is explicit: use `notify_user` with `urgency: "call"` directly.
-- Keep anything that may be spoken brief and natural to hear aloud.
+- **Use `contact`** — the one tool for reaching the user, whether you're telling them something or need an answer. (If your session still shows `notify_user` instead, the MCP hasn't refreshed yet — same fields, use it the same way.)
+- Two fields: `ask` — plain prose, what you need to tell the user or find out from them — and `waiting` — what happens to your work meanwhile:
+  - `"none"`: you're just informing them.
+  - `"soft"`: you'd like an answer but can keep working.
+  - `"hard"`: you are STOPPED until they answer. This reaches them urgently and escalates to a real phone call if unanswered.
+- If the user asks you to **call** them, send `waiting: "hard"` and say so in the ask (e.g. "You asked me to call: …").
+- Paigy's broker picks the channel, phrasing, and answer format — that is its job, not yours. Keep the ask brief and natural to hear aloud; it may be spoken.
 - Use the returned `threadId` for follow-ups about the same matter. A follow-up on an existing thread supersedes its pending items; use separate threads for independent work.
 
 ## Replies and callbacks
