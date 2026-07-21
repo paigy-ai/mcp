@@ -45,7 +45,7 @@ shows a code to approve on your phone. Also on
 ```
 codex plugin marketplace add paigy-ai/mcp --ref main
 codex plugin add paigy@paigy-ai
-npx -y -p @paigy/mcp@latest paigy-mcp-onboard
+PAIGY_AGENT=codex npx -y -p @paigy/mcp@latest paigy-mcp-onboard
 ```
 
 The plugin configures the Paigy MCP server and includes guidance for calls, replies, and callbacks. Start a new Codex session after installation.
@@ -76,10 +76,14 @@ their MCP settings (Cline: `cline_mcp_settings.json`; Continue:
 }
 ```
 
-Then pair your phone, whichever client you used:
+Then pair your phone — **with the same `PAIGY_AGENT` your client's config
+uses** (the token is saved per agent; each agent reads only its own slot, so a
+mismatched name leaves the client "not paired" against an approved pairing):
 ```
-npx -y -p @paigy/mcp@latest paigy-mcp-onboard
+PAIGY_AGENT=<your-agent-name> npx -y -p @paigy/mcp@latest paigy-mcp-onboard
 ```
+Claude Code's plugin uses the default name — plain
+`npx -y -p @paigy/mcp@latest paigy-mcp-onboard` is right there.
 Approve on your phone, then sign in at [paigy.ai](https://paigy.ai) to start
 receiving messages.
 
