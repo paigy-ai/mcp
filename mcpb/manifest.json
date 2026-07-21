@@ -2,9 +2,9 @@
   "manifest_version": "0.3",
   "name": "paigy",
   "display_name": "Paigy",
-  "version": "0.24.0",
-  "description": "Call, text, or push your phone when an agent needs input mid-task \u2014 reply by voice instead of babysitting a long-running or blocked terminal.",
-  "long_description": "Paigy is a voice inbox for AI coding agents. When an agent needs your input \u2014 mid-task, blocked, or done with something long-running \u2014 it can place an actual phone call and read the question aloud, text, push, or ring your phone with a banner, so you can reply by voice instead of babysitting a terminal.\n\nWithout Paigy, a long agent session means one of two bad options: sit and watch the terminal so you don't miss the moment it needs you, or walk away and come back to a task that stalled an hour ago waiting on a question you never saw. Paigy closes that gap \u2014 the moment your agent actually needs a decision, your phone gets pulled into the loop with the level of urgency that matches the moment, so you find out immediately instead of on your next check-in. It also pairs with the native Paigy iOS app, so a call rings through like a real phone call (CallKit) even when your phone is locked.",
+  "version": "0.25.0",
+  "description": "Call, text, or push your phone when an agent needs input mid-task — reply by voice instead of babysitting a long-running or blocked terminal.",
+  "long_description": "Paigy is a voice inbox for AI coding agents. When an agent needs your input — mid-task, blocked, or done with something long-running — it can place an actual phone call and read the question aloud, text, push, or ring your phone with a banner, so you can reply by voice instead of babysitting a terminal.\n\nWithout Paigy, a long agent session means one of two bad options: sit and watch the terminal so you don't miss the moment it needs you, or walk away and come back to a task that stalled an hour ago waiting on a question you never saw. Paigy closes that gap — the moment your agent actually needs a decision, your phone gets pulled into the loop with the level of urgency that matches the moment, so you find out immediately instead of on your next check-in. It also pairs with the native Paigy iOS app, so a call rings through like a real phone call (CallKit) even when your phone is locked.",
   "author": {
     "name": "Paigy",
     "url": "https://paigy.ai"
