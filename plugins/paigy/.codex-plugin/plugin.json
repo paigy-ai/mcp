@@ -1,6 +1,6 @@
 {
   "name": "paigy",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Call, notify, and receive replies through Paigy from Codex.",
   "author": {
     "name": "Paigy"
@@ -8,7 +8,13 @@
   "homepage": "https://paigy.ai",
   "repository": "https://github.com/paigy-ai/mcp",
   "license": "MIT",
-  "keywords": ["paigy", "codex", "mcp", "notifications", "voice"],
+  "keywords": [
+    "paigy",
+    "codex",
+    "mcp",
+    "notifications",
+    "voice"
+  ],
   "skills": "./skills/",
   "interface": {
     "displayName": "Paigy",
@@ -16,7 +22,9 @@
     "longDescription": "Paigy adds its MCP server and a safe workflow for notifications, calls, replies, and callbacks in Codex.",
     "developerName": "Paigy",
     "category": "Productivity",
-    "capabilities": ["Interactive"],
+    "capabilities": [
+      "Interactive"
+    ],
     "defaultPrompt": [
       "Pair Paigy with this Codex session.",
       "Send a Paigy notification when I need a decision.",

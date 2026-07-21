@@ -15,10 +15,12 @@ Use the Paigy MCP tools supplied by this plugin. Do not invoke a Paigy server fr
 
 ## Sending attention
 
-- Prefer `notify` for new messages; use the returned `threadId` for follow-ups about the same matter.
-- Use `urgency: "call"` only when the user explicitly asks for a test call or when work is genuinely blocked and time-sensitive.
-- Keep call titles and descriptions brief and natural to hear aloud.
-- Sending a follow-up on an existing thread supersedes its pending items. Use separate threads for independent work.
+- **Always use `notify_user`** — never the bare `notify` tool. (Field incident 2026-07-21: a greeting sent via `notify` landed as a silent inbox item while the user waited for a call.)
+- **Prefer the simplified form**: pass `ask` (plain prose: what you need to tell the user, or find out from them) plus `urgencyHint` and `blocking`. Paigy's broker picks the channel, answer shape, and phrasing — that is its job, not yours.
+- `urgencyHint`: `"now"` when you are stopped or the moment is time-sensitive; `"soon"` when you want an answer but can keep working; `"whenever"` for FYIs. Set `blocking: true` whenever real work is stalled behind the answer — unanswered blocking asks escalate to a real phone call automatically.
+- If the user asks you to **call** them, that is explicit: use `notify_user` with `urgency: "call"` directly.
+- Keep anything that may be spoken brief and natural to hear aloud.
+- Use the returned `threadId` for follow-ups about the same matter. A follow-up on an existing thread supersedes its pending items; use separate threads for independent work.
 
 ## Replies and callbacks
 
