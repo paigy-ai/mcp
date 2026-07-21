@@ -17,6 +17,15 @@ A standard MCP server (stdio, TypeScript) — no client-specific code anywhere, 
 
 ## Install
 
+**One line, any terminal** — detects your agents (Claude Code, Codex,
+Antigravity), wires Paigy into each, and pairs your phone once. Prints every
+command before running it; `--dry-run` shows the plan:
+```
+curl -fsSL https://paigy.ai/install | sh
+```
+
+Prefer to do it by hand? Pick your client below.
+
 **Claude Code** (plugin — easiest path on Claude):
 ```
 /plugin marketplace add paigy-ai/mcp
@@ -24,6 +33,13 @@ A standard MCP server (stdio, TypeScript) — no client-specific code anywhere, 
 ```
 Connects automatically; the first time an agent uses it while unpaired, it'll
 prompt you to pair — run `/paigy-onboard` (opens your browser to approve).
+
+**Claude Desktop** (MCPB bundle — no terminal needed):
+download [`paigy.mcpb`](https://github.com/paigy-ai/mcp/releases/latest/download/paigy.mcpb),
+then in Claude Desktop open **Settings → Extensions** and drag the file in (or
+double-click it). Ask Claude to *"pair with Paigy"* — it runs pairing itself and
+shows a code to approve on your phone. Also on
+[Smithery](https://smithery.ai/servers/paigy/paigy-mcp).
 
 **Codex CLI:**
 ```
