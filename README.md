@@ -45,19 +45,22 @@ shows a code to approve on your phone. Also on
 ```
 codex plugin marketplace add paigy-ai/mcp --ref main
 codex plugin add paigy@paigy-ai
-PAIGY_AGENT=codex npx -y -p @paigy/mcp@latest paigy-mcp-onboard
+npx -y -p @paigy/mcp@latest paigy-mcp-onboard
 ```
 
 The plugin configures the Paigy MCP server and includes guidance for calls, replies, and callbacks. Start a new Codex session after installation.
 
 **Codex CLI — direct MCP fallback:**
 ```
-codex mcp add paigy --env PAIGY_AGENT=codex -- npx -y @paigy/mcp@latest
+codex mcp add paigy -c 'mcp_servers.paigy.env_vars=["CODEX_THREAD_ID","CODEX_SESSION_ID"]' -- npx -y @paigy/mcp@latest
 ```
+The `env_vars` forwards Codex's thread id into the server so each Codex conversation
+gets its own Paigy identity — Codex builds the MCP server's environment from a fixed
+allow-list, so a variable it isn't told to pass never reaches us.
 
 **Gemini CLI:**
 ```
-gemini mcp add -s user -e PAIGY_AGENT=gemini paigy npx -y @paigy/mcp@latest
+gemini mcp add -s user paigy npx -y @paigy/mcp@latest
 ```
 
 **Any other MCP client** (Cline, Continue.dev, Zed, Cursor, or a CLI that
@@ -69,21 +72,19 @@ their MCP settings (Cline: `cline_mcp_settings.json`; Continue:
   "mcpServers": {
     "paigy": {
       "command": "npx",
-      "args": ["-y", "@paigy/mcp@latest"],
-      "env": { "PAIGY_AGENT": "local" }
+      "args": ["-y", "@paigy/mcp@latest"]
     }
   }
 }
 ```
 
-Then pair your phone — **with the same `PAIGY_AGENT` your client's config
-uses** (the token is saved per agent; each agent reads only its own slot, so a
-mismatched name leaves the client "not paired" against an approved pairing):
+Then pair your phone:
 ```
-PAIGY_AGENT=<your-agent-name> npx -y -p @paigy/mcp@latest paigy-mcp-onboard
+npx -y -p @paigy/mcp@latest paigy-mcp-onboard
 ```
-Claude Code's plugin uses the default name — plain
-`npx -y -p @paigy/mcp@latest paigy-mcp-onboard` is right there.
+Each session hatches its own identity automatically the first time it reaches Paigy —
+no agent name to set or match. (Set `PAIGY_AGENT=<name>` only if you deliberately want a
+client to always speak as one fixed named identity; then run onboard with the same name.)
 Approve on your phone, then sign in at [paigy.ai](https://paigy.ai) to start
 receiving messages.
 

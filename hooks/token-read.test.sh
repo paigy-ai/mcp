@@ -10,6 +10,10 @@ HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # is exactly how the 0.22.0 breakage went unnoticed.
 . "$HERE/token.sh"
 read_token() { read_paigy_token "$1"; }
+# Pin the slot deterministically: production asks the SDK (paigy-slot over npx), but the
+# test must not depend on a published MCP or the ambient session — it overrides the one
+# function the slot comes from. This still exercises the REAL read; only the slot is fixed.
+paigy_slot() { echo "session:testsess"; }
 
 TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT
@@ -20,8 +24,8 @@ check() { # name, expected, actual
   else echo "  FAIL  $1 — expected '$2', got '$3'"; fail=$((fail+1)); fi
 }
 
-# 1. Keyed map, this agent's slot (the shape that broke it).
-echo '{"mcp-agent":{"access_token":"claude-tok","name":"Claude Code"},"codex":{"access_token":"codex-tok"}}' > "$TMP/t.json"
+# 1. Keyed map, this session's slot (the shape that broke it) — keyed by the derived slot.
+echo '{"session:testsess":{"access_token":"claude-tok","name":"Claude Code"},"codex":{"access_token":"codex-tok"}}' > "$TMP/t.json"
 check "keyed map -> own slot" "claude-tok" "$(read_token "$TMP/t.json")"
 
 # 2. Same file, but running as a different agent.

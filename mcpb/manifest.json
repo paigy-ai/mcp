@@ -43,7 +43,7 @@
     "paigy_agent": {
       "type": "string",
       "title": "Agent label",
-      "description": "Label shown on Paigy notifications for this agent (defaults to \"mcp-agent\" if left blank).",
+      "description": "Optional. Leave blank and each session gets its own identity automatically. Set a fixed label only if you want this app to always speak as one named identity.",
       "required": false
     }
   }
