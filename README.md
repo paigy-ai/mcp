@@ -52,11 +52,17 @@ The plugin configures the Paigy MCP server and includes guidance for calls, repl
 
 **Codex CLI — direct MCP fallback:**
 ```
-codex mcp add paigy -c 'mcp_servers.paigy.env_vars=["CODEX_THREAD_ID","CODEX_SESSION_ID"]' -- npx -y @paigy/mcp@latest
+codex mcp add paigy -- npx -y @paigy/mcp@latest
 ```
-The `env_vars` forwards Codex's thread id into the server so each Codex conversation
-gets its own Paigy identity — Codex builds the MCP server's environment from a fixed
-allow-list, so a variable it isn't told to pass never reaches us.
+Then forward Codex's thread id into the server, so each Codex conversation gets its own
+Paigy identity — Codex builds the MCP server's environment from a fixed allow-list, so a
+variable it isn't told to pass never reaches us. Add this line under `[mcp_servers.paigy]`
+in `~/.codex/config.toml` (`paigy-harness setup` does it for you):
+```toml
+env_vars = ["CODEX_THREAD_ID", "CODEX_SESSION_ID"]
+```
+(Don't pass it as a `-c` override on `mcp add` — that lands before the block is written
+and Codex rejects the half-table with "invalid transport", writing nothing.)
 
 **Gemini CLI:**
 ```

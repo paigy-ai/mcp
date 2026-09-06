@@ -23,7 +23,14 @@
 # it deterministically instead of spawning npx (and so there is still exactly one place the
 # slot comes from). An explicit PAIGY_AGENT short-circuits the spawn — paigy-slot would only
 # echo it back.
-paigy_slot() { npx -y -p @paigy/mcp@latest paigy-slot 2>/dev/null; }
+#
+# The hook is HANDED its session id (escalate.sh / quick-check.sh set SESSION_ID from $1,
+# which on-submit.sh reads out of Claude Code's stdin JSON). We feed that in as
+# PAIGY_SESSION_ID — first in the SDK's chain — rather than trusting the environment: Claude
+# Code's docs say hooks get no CLAUDE_CODE_SESSION_ID, and without it paigy-slot would fall
+# to the per-workspace cwd hash and read the WRONG identity (the statusline's exact bug,
+# 2026-09-05). Empty SESSION_ID = absent, and the chain decides as before.
+paigy_slot() { PAIGY_SESSION_ID="${SESSION_ID:-}" npx -y -p @paigy/mcp@latest paigy-slot 2>/dev/null; }
 
 read_paigy_token() {
   local slot="${PAIGY_AGENT:-$(paigy_slot)}"
