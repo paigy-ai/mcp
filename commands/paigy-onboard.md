@@ -2,7 +2,7 @@
 description: Pair this agent with your Paigy account (one-time).
 ---
 Pair this Claude Code agent with the user's Paigy account so the Paigy MCP tools
-(`notify_user`, `await_reply`, `check_replies`, …) can reach them. Do it
+(`contact`, `check_replies`, …) can reach them. Do it
 in-context with the `pair` tool — no shell step needed:
 
 1. Call the `pair` tool with **no arguments**. It attempts to open the user's
@@ -32,7 +32,7 @@ just keep calling `pair`. Once it returns the token, retry whatever you were doi
    `.claude/settings.json` if they said project) under `permissions.allow`:
 
    ```json
-   "mcp__paigy__notify_user", "mcp__paigy__await_reply", "mcp__paigy__check_replies",
+   "mcp__paigy__notify_user", "mcp__paigy__check_replies",
    "mcp__paigy__set_task_state", "mcp__paigy__schedule_callback", "mcp__paigy__get_thread"
    ```
 

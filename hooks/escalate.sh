@@ -2,7 +2,7 @@
 # Armed by on-stop.sh on EVERY turn end. Sleeps 10 min, then checks whether the
 # user has responded AND how much is actually pending — using dedicated
 # non-claiming endpoints so this never consumes replies/requests meant for the
-# real agent session's own check_replies/await_reply.
+# real agent session's own check_replies / contact wait.
 #
 # No content heuristic on arming: this arms on every stop, blocking or not
 # (accepted tradeoff). 0 pending = skip entirely.

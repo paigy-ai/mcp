@@ -26,6 +26,6 @@ Use the Paigy MCP tools supplied by this plugin. Do not invoke a Paigy server fr
 
 ## Replies and callbacks
 
-- Use `await_reply` for a notification just sent; use `check_replies` when resuming work or checking outstanding items.
+- A `contact` that rings holds its first ~45 s window itself and returns the outcome in `wait`; keep waiting on that call with `contact({ wait: notificationId })` alone (nothing is sent). A message delivery is never polled for. Use `check_replies` when resuming work or checking outstanding items.
 - A `schedule_callback` records an obligation; it does not itself send a notification. When the callback is due, use `check_replies`, then send the promised follow-up on the same `threadId`.
 - Honor the user's requested channel and timing. If a scheduled time has passed, report that clearly and ask before sending a late call unless the user explicitly asked for it to be sent even if late.
