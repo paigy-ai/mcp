@@ -1,12 +1,12 @@
 {
   "hooks": {
-    "UserPromptSubmit": [
+    "Stop": [
       {
         "matcher": "",
         "hooks": [
           {
             "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/on-submit.sh"
+            "command": "npx -y -p @paigy/mcp@latest paigy-stalled"
           }
         ]
       }

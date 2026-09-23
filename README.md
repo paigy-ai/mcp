@@ -129,38 +129,17 @@ in passing, that you can text or call them when it's done or if you hit a
 blocker. Don't offer it for quick tasks, and don't repeat the offer once
 they've answered.
 
-## Idle escalation (automatic, no setup)
+## Stalled work (automatic, no setup)
 
-Installing this plugin also wires up Claude Code hooks (`hooks/hooks.json`,
-via `${CLAUDE_PLUGIN_ROOT}` — no manual `settings.json` editing) that back
-`notify_user` up with a mechanical safety net, independent of the agent
-session — it still fires even if that session crashed or forgot:
+Installing this plugin wires one Claude Code hook (`hooks/hooks.json`, via the plugin root,
+no manual `settings.json` editing). When a session stops and its agent owns Paigy Goals with
+no progress for three days, the hook holds the stop **once a day** and lists them, so the agent
+updates, finishes or cancels each before it goes quiet. It runs `paigy-stalled` from
+`@paigy/mcp` (0.40.15 or later) and is silent otherwise: nothing stalled, a stop already being
+continued by a hook, a reminder already given that day, or any error.
 
-- **10-minute check** (`escalate.sh`): how much is actually pending
-  (`GET /api/pending/summary`, a non-claiming read) — a single fresh item
-  gets a `banner`, several or a stale one gets a real `call` (routed through
-  the same call-coalescing the bot uses, so several ringing things fold into
-  one call instead of ringing separately).
-- **2-minute check** (`quick-check.sh`): a narrower, faster check for a
-  different case — you already replied to something (via the app), but no
-  agent has engaged with it yet. That's not "nothing happened" (escalate.sh's
-  job), it's "the agent hasn't looked." It spawns a **fresh** headless
-  `claude -p` (deliberately NOT resuming your live session — no injected
-  turns in a transcript you might be typing in) scoped to just the tools it
-  needs; that agent acknowledges the missed reply with a natural message in
-  the same thread ("sorry I missed this — starting on it now"), so what you
-  see is a normal agent response, not a system nudge. Only if that's
-  unavailable or fails does it fall back to a plain nudge telling you to
-  reopen the session yourself.
-
-Hooks are the *dead-session* safety net. A live-but-idle agent shouldn't
-need them: the MCP server instructions tell every paired agent to schedule
-its own ~2-minute wake-up (harness `ScheduleWakeup` or equivalent) and
-`check_replies` whenever it ends a turn with anything possibly pending —
-self-polling in its own session, full context intact.
-
-Nothing pending/unacknowledged — including a normal "just finished" stop —
-means neither check does anything.
+The same list reaches an agent two other ways: `check_replies` returns it under `stalled`, and
+`paigy-listen` carries it in the work it hands a session it wakes.
 
 ## License
 
