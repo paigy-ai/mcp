@@ -1,6 +1,6 @@
 {
   "name": "paigy",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Call, notify, and receive replies through Paigy from Codex.",
   "author": {
     "name": "Paigy"
@@ -16,6 +16,7 @@
     "voice"
   ],
   "skills": "./skills/",
+  "hooks": "./hooks/hooks.json",
   "interface": {
     "displayName": "Paigy",
     "shortDescription": "Voice inbox and callbacks for Codex.",

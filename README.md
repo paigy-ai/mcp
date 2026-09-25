@@ -131,15 +131,22 @@ they've answered.
 
 ## Stalled work (automatic, no setup)
 
-Installing this plugin wires one Claude Code hook (`hooks/hooks.json`, via the plugin root,
-no manual `settings.json` editing). When a session stops and its agent owns Paigy Goals with
-no progress for three days, the hook holds the stop **once a day** and lists them, so the agent
-updates, finishes or cancels each before it goes quiet. It runs `paigy-stalled` from
-`@paigy/mcp` (0.40.15 or later) and is silent otherwise: nothing stalled, a stop already being
-continued by a hook, a reminder already given that day, or any error.
+When a session stops and its agent owns Paigy Goals with no progress for three days, a Stop
+hook holds the stop **once a day** and lists them, so the agent updates, finishes or cancels
+each before it goes quiet. It runs `paigy-stalled` from `@paigy/mcp` (0.40.15 or later) and is
+silent otherwise: nothing stalled, a stop already being continued by a hook, a reminder already
+given that day, or any error. One script, the same hook in each harness's plugin:
 
-The same list reaches an agent two other ways: `check_replies` returns it under `stalled`, and
-`paigy-listen` carries it in the work it hands a session it wakes.
+- **Claude Code** — `hooks/hooks.json`, wired by the plugin; nothing to set up.
+- **Codex CLI** — `plugins/paigy/hooks/hooks.json`, wired by the Codex plugin. Codex runs a
+  plugin's hooks only after you trust them: review and trust the Paigy hook when Codex asks.
+- **Any other harness with a Claude-style Stop hook** — register
+  `npx -y -p @paigy/mcp@latest paigy-stalled` as the Stop command. It reads the hook's JSON
+  (`session_id`, `stop_hook_active`) on stdin and prints `{"decision":"block","reason":…}`.
+
+Hosts with no hooks still get the list: `check_replies` (which the server's instructions tell
+every agent to call on startup and after a wake) returns it under `stalled`, and `paigy-listen`
+carries it in the work it hands a session it wakes.
 
 ## License
 
