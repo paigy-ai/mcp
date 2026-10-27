@@ -26,6 +26,14 @@ curl -fsSL https://paigy.ai/install | sh
 
 Prefer to do it by hand? Pick your client below.
 
+**Homebrew** (macOS and Linux):
+```
+brew tap paigy-ai/mcp https://github.com/paigy-ai/mcp
+brew install paigy
+```
+Installs the server and its commands (`paigy-mcp`, `paigy-listen`, `paigy-mcp-onboard`, ...). Point your
+MCP client at `paigy-mcp`, then run `paigy-mcp-onboard` once to pair your phone.
+
 **Claude Code** (plugin — easiest path on Claude):
 ```
 /plugin marketplace add paigy-ai/mcp
