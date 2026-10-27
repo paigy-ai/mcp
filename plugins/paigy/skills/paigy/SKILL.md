@@ -11,7 +11,9 @@ The user is remote. Reach them only through Paigy's tools, never the terminal. T
 ## Pairing
 
 - Call `configure` first. With a device credential on this machine it hatches you at once.
-- Otherwise it returns `user_message`: print that code to the user, and in the same turn call `configure` again with its `device_code`. On `pending`, call again.
+- Otherwise print its `user_message` to the user, then do what the result says:
+  - `awaiting_approval`: call `configure` again with its `device_code` in the same turn. On `pending`, call again.
+  - `awaiting_confirmation`: end your turn with the code as your whole reply; call `configure` with the `device_code` next turn. Calling it in the same turn drops the code.
 - When it returns `enable_command`, print it for the user to run. Do not run it yourself.
 - `configure({ logOut: true })` logs out only this agent, and only when the user asks.
 
@@ -30,10 +32,10 @@ The user is remote. Reach them only through Paigy's tools, never the terminal. T
 
 ## Receiving
 
-- On startup, after every wake or listener line, after every merge: `contact({ wait: false })`.
+- On startup and after every wake or listener line: `contact({ wait: false })`.
 - Events: `question` (you owe an answer: send `answers`), `update` (something new on your Goal: an answer, a reply, a review), `instruction` (work sent to you).
 - Read the Goal with `get_goals` before acting. An answer arrives as an `update` event and lands on the question's Goal. A question reading `replied` means they chose no option: settle it from their words.
-- Acknowledge each event you handled: `contact({ ackEventIds })`. Reading acknowledges nothing; events repeat until acknowledged.
+- Acknowledge each event you handled: `contact({ ackEventIds })`. Reading acknowledges nothing; events repeat until acknowledged. A `question` event is answered, never acknowledged away.
 - `contact({ wait: true })` waits about 45 s. On `expired`, wait again without re-sending, or stop. No while-loops: while any Call is open, keep receiving through empty windows; otherwise stop at one empty window.
 
 ## Asking
@@ -45,12 +47,12 @@ The user is remote. Reach them only through Paigy's tools, never the terminal. T
 - Read the Goal before asking. Never re-ask an open or answered question, or one whose work shipped.
 - Take back a question that no longer matters: `withdrawQuestionIds`.
 - An answer you give (`answers`) is at most 80 characters.
-- A diagnosis says when, why and how, then proposes one fix.
 
 ## Updates and completions
 
 - An update (`updates`: `message` ≤80, `goalIds`) asks nothing. It reaches the user only when they asked for it, when it answers something they said, or when its Goal is done; otherwise it stays on the Goal as progress.
-- `reply` is the button in the user's voice instead of "Got it", ≤50 characters ("Sounds good, I'll test later"). Required when the update is delivered (`userExplicitlyRequested`) or completes a Goal.
+- Updates never complete a Goal.
+- `reply` is the button in the user's voice instead of "Got it", ≤50 characters ("Sounds good, I'll test later"). Required (`reply_required`) when the update is delivered on request (`userExplicitlyRequested`) or any Goal it names is already done.
 - Set `userExplicitlyRequested` only to relay the user's own words: `"any"` for "send it to me", `"call"` for "call me". Never to make a message louder.
 - Finish with a completion (`contact.completions`, or `manage_goals` kind `complete`): `goalId`, `message` ≤50, `reply` ≤50, optional `units`, optional next-step `options` {label, hint}. It closes and reports in one step. Say only what your evidence supports.
 - Read `results`: each item applies on its own, and a failed one names why.
@@ -63,7 +65,7 @@ The user is remote. Reach them only through Paigy's tools, never the terminal. T
   - `defer`: `until`. You are woken when it passes. This is how you follow up later.
   - `dependency`: `add`/`remove`; `goalId` waits on `dependsOnGoalId` to `start` or `complete`.
   - `edit`, `move`, `state` (open, completed, canceled).
-- Before completing: withdraw your own open questions on the Goal, finish or move its required children, clear its dependencies.
+- Any open question on a Goal, anyone's, blocks its completion (`goal_blocked`). Before completing, withdraw yours, finish or move its required children, and clear its dependencies.
 - On `goal_revision_conflict`, read the Goal again and reconsider.
 - Before overlapping work, read `check_activity` and the Goal's other contributors. Every Goal of your person is open to you; your first write puts you on it.
 - `search` finds earlier words, Goals and answers. Nothing found is not proof of absence.
