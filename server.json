@@ -4,14 +4,19 @@
   "title": "Paigy",
   "description": "Lets your AI agents call you when they need a decision, and hear your answer.",
   "websiteUrl": "https://paigy.ai",
-  "repository": { "url": "https://github.com/paigy-ai/mcp", "source": "github" },
-  "version": "0.40.40",
+  "repository": {
+    "url": "https://github.com/paigy-ai/mcp",
+    "source": "github"
+  },
+  "version": "0.40.42",
   "packages": [
     {
       "registryType": "npm",
       "identifier": "@paigy/mcp",
-      "version": "0.40.40",
-      "transport": { "type": "stdio" }
+      "version": "0.40.42",
+      "transport": {
+        "type": "stdio"
+      }
     }
   ]
 }
