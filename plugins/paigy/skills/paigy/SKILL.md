@@ -8,6 +8,10 @@ description: Reach the user through Paigy. Use whenever you need to tell the use
 
 The user is remote. Reach them only through Paigy's tools, never the terminal. The server's own instructions and each tool's description are the contract: read them. Every read ends in `next`, the one step to take.
 
+This same guide is inside the MCP: the `help` tool (whole, or one `topic`) and the `/mcp__paigy__help` prompt. `/mcp__paigy__welcome` starts a session.
+
+Hosted (no machine): skip Pairing and Listening; answers wake you.
+
 ## Pairing
 
 - Call `configure` first. With a device credential on this machine it hatches you at once.
