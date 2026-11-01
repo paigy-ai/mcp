@@ -56,6 +56,7 @@ Hosted (no machine): skip Pairing and Listening; answers wake you.
 
 - An update (`updates`: `message` ≤80, `goalIds`) asks nothing. It reaches the user only when they asked for it, when it answers something they said, or when its Goal is done; otherwise it stays on the Goal as progress.
 - Updates never complete a Goal.
+- One load-bearing point per report: `message` is the point they must not miss, and a second point that would go wrong or stay unclear later if they missed it is its own update. `units` are context they may open, never something they must hear.
 - `reply` is the button in the user's voice instead of "Got it", ≤50 characters ("Sounds good, I'll test later"). Required (`reply_required`) when the update is delivered on request (`userExplicitlyRequested`) or any Goal it names is already done.
 - Set `userExplicitlyRequested` only to relay the user's own words: `"any"` for "send it to me", `"call"` for "call me". Never to make a message louder.
 - Finish with a completion (`contact.completions`, or `manage_goals` kind `complete`): `goalId`, `message` ≤50, `reply` ≤50, optional `units`, optional next-step `options` {label, hint}. It closes and reports in one step. Say only what your evidence supports.
