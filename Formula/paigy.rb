@@ -1,8 +1,8 @@
 class Paigy < Formula
   desc "Lets your AI agents reach you by call, push or card, and hear your answer"
   homepage "https://paigy.ai"
-  url "https://registry.npmjs.org/@paigy/mcp/-/mcp-0.40.43.tgz"
-  sha256 "88fde34f2fb7b2da775512e480c21aa71a6ecac2dfa2f214af8cd097661bdd4f"
+  url "https://registry.npmjs.org/@paigy/mcp/-/mcp-0.40.44.tgz"
+  sha256 "d51046ffe77809515d7e597cceb482eee6cc831b47a24d7d576ae4487ece4935"
   license "MIT"
 
   depends_on "node"

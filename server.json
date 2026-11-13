@@ -8,12 +8,12 @@
     "url": "https://github.com/paigy-ai/mcp",
     "source": "github"
   },
-  "version": "0.40.43",
+  "version": "0.40.44",
   "packages": [
     {
       "registryType": "npm",
       "identifier": "@paigy/mcp",
-      "version": "0.40.43",
+      "version": "0.40.44",
       "transport": {
         "type": "stdio"
       }
