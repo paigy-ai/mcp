@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "paigy": {
+      "url": "https://paigy.ai/api/mcp",
+      "tools": {
+        "contact": { "eager": true },
+        "get_goals": { "eager": true },
+        "manage_goals": { "eager": true }
+      }
+    }
+  }
+}
