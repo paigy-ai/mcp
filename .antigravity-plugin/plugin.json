@@ -1,0 +1,29 @@
+{
+  "$schema": "https://antigravity.google/schemas/v1/plugin.json",
+  "name": "paigy",
+  "displayName": "Paigy",
+  "version": "0.1.0",
+  "description": "The AI agent harness that calls your phone when it needs a decision or finishes the job. Answer by voice and your agent resumes.",
+  "logo": "assets/logo.svg",
+  "suggestedPrompts": [
+    "Call my phone right now to test Paigy",
+    "Organize this project into a Paigy board I can run from my phone",
+    "Check what's waiting on me in Paigy"
+  ],
+  "skills": "./plugins/paigy/skills",
+  "author": {
+    "name": "Paigy",
+    "url": "https://paigy.ai"
+  },
+  "homepage": "https://paigy.ai",
+  "repository": "https://github.com/paigy-ai/mcp",
+  "license": "MIT",
+  "keywords": [
+    "paigy",
+    "voice",
+    "phone",
+    "notifications",
+    "approvals",
+    "goals"
+  ]
+}

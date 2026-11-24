@@ -8,9 +8,10 @@ Without Paigy, a long agent session means one of two bad options: sit and watch 
 
 A standard MCP server (stdio, TypeScript) — no client-specific code anywhere, verified over the raw protocol against a non-Claude client identity.
 
+- Google Antigravity (App, CLI, IDE — native plugin with 1-click OAuth)
 - Claude Code (this repo is also the plugin + marketplace for it)
 - Codex CLI
-- Gemini CLI
+- Grok
 - Any other MCP client via standard config: Cline, Continue.dev, Zed, Cursor, Goose, mcphost — including local-model setups over Ollama, LM Studio, or llama.cpp
 
 (The app + backend live in a separate repo.)
@@ -35,6 +36,12 @@ brew install paigy
 (`brew trust` is how current Homebrew opts in to a tap outside homebrew-core.)
 Installs the server and its commands (`paigy-mcp`, `paigy-listen`, `paigy-mcp-onboard`, ...). Point your
 MCP client at `paigy-mcp`, then run `paigy-mcp-onboard` once to pair your phone.
+
+**Google Antigravity** (App, CLI, IDE — 1-click OAuth, no terminal pairing needed):
+```
+agy plugin install https://github.com/paigy-ai/mcp
+```
+Or install **Paigy** from **Customizations → Marketplace** in the Antigravity App. Connects to `https://paigy.ai/api/mcp` and opens your browser to approve in one click. Want background wake and phone-launched sessions on this machine too? Run `curl -fsSL https://paigy.ai/install | sh`.
 
 **Claude Code** (plugin — easiest path on Claude):
 ```

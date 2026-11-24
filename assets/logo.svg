@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="12 28 80 80" width="160" height="160">
+  <style>
+    .peri { stroke: #6e74ec; } .peri-f { fill: #6e74ec; }
+    .gold { stroke: #c2a05a; } .gold-f { fill: #c2a05a; }
+    .body { fill: #c6c9f6; }
+    @media (prefers-color-scheme: dark) {
+      .peri { stroke: #a9aef8; } .peri-f { fill: #a9aef8; }
+      .gold { stroke: #d8ba78; } .gold-f { fill: #d8ba78; }
+      .body { fill: #4a4fa8; }
+    }
+  </style>
+  <path class="body" fill="#c6c9f6"
+    d="M 47 36 H 53 A 27 27 0 0 1 80 63 V 66.7 A 28.8 28.8 0 0 1 51.2 95.5 H 48.8 A 28.8 28.8 0 0 1 20 66.7 V 63 A 27 27 0 0 1 47 36 Z" />
+  <path class="peri" d="M 80 67.5 A 24 26.5 0 0 1 56 94" fill="none" stroke="#6e74ec" stroke-width="6" stroke-linecap="round" />
+  <line class="peri" x1="23" y1="49" x2="23" y2="85.5" stroke="#6e74ec" stroke-width="6" stroke-linecap="round" />
+  <line class="gold" x1="77.5" y1="49" x2="77.5" y2="70.5" stroke="#c2a05a" stroke-width="6" stroke-linecap="round" />
+  <circle class="peri" cx="37" cy="61.25" r="10" fill="none" stroke="#6e74ec" stroke-width="6" />
+  <circle class="gold" cx="63" cy="61.25" r="10" fill="none" stroke="#c2a05a" stroke-width="6" />
+  <circle class="peri-f" cx="37" cy="61.25" r="4" fill="#6e74ec" />
+  <circle class="gold-f" cx="63" cy="61.25" r="4" fill="#c2a05a" />
+  <g class="peri" stroke="#6e74ec" stroke-linecap="round">
+    <line x1="77.75" y1="38.9" x2="77.75" y2="48.6" stroke-width="2.75" />
+    <line x1="72.9" y1="43.75" x2="82.6" y2="43.75" stroke-width="2.75" />
+    <line x1="75.05" y1="41.05" x2="80.45" y2="46.45" stroke-width="2.1" />
+    <line x1="80.45" y1="41.05" x2="75.05" y2="46.45" stroke-width="2.1" />
+  </g>
+</svg>
